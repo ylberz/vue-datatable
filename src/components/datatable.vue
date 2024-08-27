@@ -1,5 +1,43 @@
 <script setup lang="ts">
-import { reactive } from "vue";
+import { computed, reactive, ref } from "vue";
+
+const props = defineProps<{
+  options: {
+    columns: Array<{
+      key: string;
+      name?: string | null;
+      filter: boolean;
+      sort: boolean;
+    }>;
+    data: Array<any>;
+    colors?: {
+      headRow?: string;
+      oddRow?: string;
+      evenRow?: string;
+      font?: string;
+      border?: string;
+      card?: string;
+    };
+  };
+}>();
+
+const defaultColors = {
+  headRow: "#f4f4f4",
+  oddRow: "#fff",
+  evenRow: "#f9f9f9",
+  font: "#333",
+  border: "#ddd",
+  card: "#fff",
+};
+
+const colors = reactive({
+  ...defaultColors,
+  ...props.options.colors,
+});
+
+const filters = reactive<{ [key: string]: string }>({});
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
 const showHide = reactive<{ filter: boolean }>({
   filter: false,
@@ -7,6 +45,64 @@ const showHide = reactive<{ filter: boolean }>({
 
 const togleFilter = () => {
   showHide.filter = !showHide.filter;
+  if (showHide.filter) {
+    props.options.columns.forEach((col) => {
+      if (col.filter) {
+        filters[col.key] = "";
+      }
+    });
+  } else {
+    Object.keys(filters).forEach((key) => {
+      filters[key] = "";
+    });
+  }
+};
+
+const getColumnNames = computed(() => {
+  return props.options.columns.map((col) => col.name || col.key);
+});
+
+const getColumnKeys = computed(() => {
+  return props.options.columns.map((col) => col.key);
+});
+
+const getColumns = computed(() => {
+  return props.options.columns;
+});
+
+const getData = computed(() => {
+  currentPage.value = 1;
+  return props.options.data.filter((row) => {
+    return props.options.columns.every((col) => {
+      if (col.filter) {
+        const filterValue = filters[col.key]?.toLowerCase() || "";
+        const cellValue = (row[col.key] || "").toString().toLowerCase();
+        return cellValue.includes(filterValue);
+      }
+      return true;
+    });
+  });
+});
+const paginatedData = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage.value;
+  const endIndex = startIndex + itemsPerPage.value;
+  return getData.value.slice(startIndex, endIndex);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(getData.value.length / itemsPerPage.value);
+});
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+const changeItemsPerPage = (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  itemsPerPage.value = Number(target.value);
+  currentPage.value = 1;
 };
 </script>
 
@@ -14,105 +110,119 @@ const togleFilter = () => {
   <div class="table-card">
     <div class="table-head-card">
       <div class="table-options">
-        <button>E</button>
-        <button @click="togleFilter">F</button>
+        <button @click="togleFilter"><i class="bi bi-funnel"></i></button>
       </div>
     </div>
     <div class="table-body-card">
-      <table>
+      <table class="data-table">
         <thead>
           <tr class="tr-column-names">
-            <th>#</th>
+            <slot name="front-column-names" />
+            <th v-for="(item, index) in getColumnNames">
+              {{ item }}
+            </th>
+            <!-- <th>#</th>
             <th>Name</th>
-            <th>LastName</th>
+            <th>LastName</th> -->
+            <slot name="end-column-names" />
           </tr>
+
           <tr class="tr-filters" v-if="showHide.filter">
-            <th><input class="inp-filter" type="text" /></th>
-            <th><input class="inp-filter" type="text" /></th>
-            <th><input class="inp-filter" type="text" /></th>
+            <slot name="front-column-filter" />
+            <th v-for="col in getColumns">
+              <input
+                class="inp-filter"
+                type="text"
+                v-if="col.filter === true"
+                v-model="filters[col.key]"
+                placeholder="Filter..."
+              />
+              <!-- how can i add dynamicly here vmodel for filter -->
+            </th>
+            <slot name="end-column-filter" />
           </tr>
         </thead>
 
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Ylber</td>
-            <td>Zeqiri</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Jane</td>
-            <td>Doe</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>John</td>
-            <td>Smith</td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td>John</td>
-            <td>Smith</td>
-          </tr>
-          <tr>
-            <td>5</td>
-            <td>John</td>
-            <td>Smith</td>
-          </tr>
-          <tr>
-            <td>6</td>
-            <td>John</td>
-            <td>Smith</td>
-          </tr>
-          <tr>
-            <td>7</td>
-            <td>John</td>
-            <td>Smith</td>
-          </tr>
-          <tr>
-            <td>8</td>
-            <td>John</td>
-            <td>Smith</td>
-          </tr>
-          <tr>
-            <td>9</td>
-            <td>John</td>
-            <td>Smith</td>
-          </tr>
-          <tr>
-            <td>10</td>
-            <td>John</td>
-            <td>Smith</td>
+          <tr v-for="rowData in paginatedData">
+            <slot name="front-column-data" />
+            <td v-for="colKey in getColumnKeys">
+              {{ rowData[colKey] }}
+            </td>
+            <slot name="end-column-data" />
           </tr>
         </tbody>
       </table>
     </div>
     <div class="table-footer-card">
-      <select class="table-row-selector">
+      <select class="table-row-selector" @change="changeItemsPerPage">
         <option value="10">10</option>
         <option value="20">20</option>
         <option value="50">50</option>
       </select>
       <div class="pagination">
-        <button>start</button>
-        <button>1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>end</button>
+        <button @click="goToPage(1)" :disabled="currentPage === 1">
+          <i class="bi bi-caret-left"></i><i class="bi bi-caret-left"></i>
+        </button>
+        <button
+          @click="goToPage(currentPage - 1)"
+          :disabled="currentPage === 1"
+        >
+          <i class="bi bi-caret-left"></i>
+        </button>
+        <button
+          v-for="page in totalPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="{ active: page === currentPage }"
+        >
+          {{ page }}
+        </button>
+        <button
+          @click="goToPage(currentPage + 1)"
+          :disabled="currentPage === totalPages"
+        >
+          <i class="bi bi-caret-right"></i>
+        </button>
+        <button
+          @click="goToPage(totalPages)"
+          :disabled="currentPage === totalPages"
+        >
+          <i class="bi bi-caret-right"></i>
+          <i class="bi bi-caret-right"></i>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style>
+* {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: var(--font-color);
+}
+.table-card {
+  --font-color: v-bind(colors.font);
+  --border-color: v-bind(colors.border);
+  --headRow-color: v-bind(colors.headRow);
+  --evenRow-color: v-bind(colors.evenRow);
+  --oddRow-color: v-bind(colors.oddRow);
+  --card-color: v-bind(colors.card);
+}
+
 .table-options {
   display: flex;
   flex-direction: row-reverse;
+  margin-bottom: 8px;
 }
-.inp-filter {
+.table-options button {
+  margin: 4px;
+}
+.tr-filters input {
   border: none;
   background-color: transparent;
-  border-bottom: 1px solid #838080;
+  border-bottom: 1px solid var(--border-color);
   height: 30px;
   font-size: 16px;
   outline: none;
@@ -124,14 +234,31 @@ const togleFilter = () => {
   display: flex;
   justify-content: space-between;
 }
+.pagination button:first-child {
+  border-radius: 10px 0 0 10px;
+}
+.pagination button:last-child {
+  border-radius: 0 10px 10px 0;
+}
 .pagination button {
   padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
   font-size: 1em;
-  background-color: #f9f9f9;
+  background-color: #fff;
   color: #333;
   cursor: pointer;
+}
+
+.table-head-card button {
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  font-size: 1em;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.pagination .active {
+  background-color: #f9f9f9;
 }
 .table-card {
   margin: 20px;
@@ -140,45 +267,49 @@ const togleFilter = () => {
   box-sizing: border-box; /* Includes padding in the width calculation */
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  background-color: #fff;
+  background-color: var(--card-color);
 }
 
-table {
+.data-table {
   width: 100%;
   border-collapse: collapse;
+  border: 1px solid var(--border-color);
 }
 
-th,
-td {
+.data-table th,
+.data-table td {
   padding: 12px;
   text-align: left;
+  border: 1px solid var(--border-color);
 }
 
-th {
-  background-color: #f4f4f4;
-  border-bottom: 2px solid #ddd;
+.data-table thead tr th {
+  background-color: var(--headRow-color);
+  border-bottom: 2px solid var(--border-color);
 }
 
-tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+.data-table tbody tr:nth-child(odd) {
+  background-color: var(--oddRow-color);
+}
+.data-table tbody tr:nth-child(even) {
+  background-color: var(--evenRow-color);
 }
 
-tbody tr:hover {
-  background-color: #f1f1f1;
-}
-
-td,
-th {
-  border: 1px solid #ddd;
+.data-table tbody tr:hover {
+  background-color: var(--evenRow-color);
 }
 
 .table-row-selector {
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
+
   border-radius: 4px;
   font-size: 1em;
-  background-color: #f9f9f9;
-  color: #333;
+  background-color: var(--primary-color);
+
+  cursor: pointer;
+}
+.table-card button {
   cursor: pointer;
 }
 </style>
