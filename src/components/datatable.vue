@@ -6,8 +6,9 @@ const props = defineProps<{
     columns: Array<{
       key: string;
       name?: string | null;
-      filter: boolean;
-      sort: boolean;
+      filter?: boolean;
+      sort?: boolean;
+      width?:string;
     }>;
     data: Array<any>;
     colors?: {
@@ -30,7 +31,7 @@ const defaultColors = {
   card: "#fff",
 };
 
-const colors = reactive({
+const colors:any = reactive({
   ...defaultColors,
   ...props.options.colors,
 });
@@ -43,7 +44,7 @@ const showHide = reactive<{ filter: boolean }>({
   filter: false,
 });
 
-const togleFilter = () => {
+const toggleFilter = () => {
   showHide.filter = !showHide.filter;
   if (showHide.filter) {
     props.options.columns.forEach((col) => {
@@ -68,6 +69,13 @@ const getColumnKeys = computed(() => {
 
 const getColumns = computed(() => {
   return props.options.columns;
+});
+
+const getColumnWidths = computed(() => {
+  return  props.options.columns.reduce((acc, col) => {
+    acc[col.key] = col.width || 'auto';
+    return acc;
+  }, {} as any);
 });
 
 const getData = computed(() => {
@@ -109,16 +117,27 @@ const changeItemsPerPage = (event: Event) => {
 <template>
   <div class="table-card">
     <div class="table-head-card">
+      <div class="">
+        <select class="table-row-selector" @change="changeItemsPerPage">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
       <div class="table-options">
-        <button @click="togleFilter"><i class="bi bi-funnel"></i></button>
+        <button @click="toggleFilter"><i class="bi bi-funnel"></i></button>
       </div>
     </div>
     <div class="table-body-card">
       <table class="data-table">
+        <colgroup>
+          <col v-for="(col, index) in getColumns" :key="index" :style="{ width: getColumnWidths[col.key] }" />
+        </colgroup>
+
         <thead>
           <tr class="tr-column-names">
             <slot name="front-column-names" />
-            <th v-for="(item, index) in getColumnNames">
+            <th v-for="(item) in getColumnNames">
               {{ item }}
             </th>
             <!-- <th>#</th>
@@ -133,9 +152,10 @@ const changeItemsPerPage = (event: Event) => {
               <input
                 class="inp-filter"
                 type="text"
-                v-if="col.filter === true"
+                v-if="col.filter"
                 v-model="filters[col.key]"
-                placeholder="Filter..."
+                :placeholder="`Filter by ${col.name || col.key}`"
+                aria-label="Filter"
               />
               <!-- how can i add dynamicly here vmodel for filter -->
             </th>
@@ -155,11 +175,11 @@ const changeItemsPerPage = (event: Event) => {
       </table>
     </div>
     <div class="table-footer-card">
-      <select class="table-row-selector" @change="changeItemsPerPage">
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-      </select>
+      <div class="goto">
+
+        <input type="number" class="go-to-input" v-model="currentPage">
+
+      </div>
       <div class="pagination">
         <button @click="goToPage(1)" :disabled="currentPage === 1">
           <i class="bi bi-caret-left"></i><i class="bi bi-caret-left"></i>
@@ -176,7 +196,7 @@ const changeItemsPerPage = (event: Event) => {
           @click="goToPage(page)"
           :class="{ active: page === currentPage }"
         >
-          {{ page }}
+            {{ page }}
         </button>
         <button
           @click="goToPage(currentPage + 1)"
@@ -209,6 +229,7 @@ const changeItemsPerPage = (event: Event) => {
   --evenRow-color: v-bind(colors.evenRow);
   --oddRow-color: v-bind(colors.oddRow);
   --card-color: v-bind(colors.card);
+  max-width: 100%;
 }
 
 .table-options {
@@ -218,6 +239,8 @@ const changeItemsPerPage = (event: Event) => {
 }
 .table-options button {
   margin: 4px;
+  cursor: pointer;
+
 }
 .tr-filters input {
   border: none;
@@ -249,16 +272,44 @@ const changeItemsPerPage = (event: Event) => {
   cursor: pointer;
 }
 
+.pagination button:hover {
+  padding: 8px;
+  border: 1px solid #1967d2;
+}
+.table-head-card{
+  display: flex;
+  justify-content: space-between;
+}
 .table-head-card button {
   padding: 4px;
   border: 1px solid var(--border-color);
   font-size: 1em;
   background-color: #fff;
   cursor: pointer;
+
 }
 
+input {
+  padding: 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  outline: 0;
+}
+
+button {
+  padding: 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.go-to-input{
+  width: 30px;
+  margin-right: 4px;
+}
 .pagination .active {
-  background-color: #f9f9f9;
+  background-color: #1967d2;
+  color: #fff;
 }
 .table-card {
   margin: 20px;
@@ -302,14 +353,10 @@ const changeItemsPerPage = (event: Event) => {
 .table-row-selector {
   padding: 8px;
   border: 1px solid var(--border-color);
-
   border-radius: 4px;
   font-size: 1em;
   background-color: var(--primary-color);
+  cursor: pointer;
+}
 
-  cursor: pointer;
-}
-.table-card button {
-  cursor: pointer;
-}
 </style>
