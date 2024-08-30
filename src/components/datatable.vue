@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 
 const props = defineProps<{
   options: {
@@ -36,12 +36,26 @@ const colors = reactive({
 });
 
 const filters = reactive<{ [key: string]: string }>({});
+
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+const filteredData = ref<Array<any>>(structuredClone(props.options.data) || []); // Ref to store filtered data
 
 const showHide = reactive<{ filter: boolean }>({
   filter: false,
 });
+
+const sort = (sortForm: string, key: string) => {
+  filteredData.value = filteredData.value.sort((a, b) => {
+    if (a[key] < b[key]) {
+      return -1;
+    }
+    if (a[key] > b[key]) {
+      return 1;
+    }
+    return 0;
+  });
+};
 
 const togleFilter = () => {
   showHide.filter = !showHide.filter;
@@ -70,27 +84,69 @@ const getColumns = computed(() => {
   return props.options.columns;
 });
 
-const getData = computed(() => {
-  currentPage.value = 1;
-  return props.options.data.filter((row) => {
-    return props.options.columns.every((col) => {
-      if (col.filter) {
-        const filterValue = filters[col.key]?.toLowerCase() || "";
-        const cellValue = (row[col.key] || "").toString().toLowerCase();
-        return cellValue.includes(filterValue);
-      }
-      return true;
-    });
+// const getData = computed(() => {
+//   currentPage.value = 1;
+//   return props.options.data.filter((row) => {
+//     return props.options.columns.every((col) => {
+//       if (col.filter && filters[col.key]) {
+//         const filterValue = filters[col.key]?.toLowerCase() || "";
+//         const cellValue = (row[col.key] || "").toString().toLowerCase();
+//         return cellValue.includes(filterValue);
+//       }
+//       return true;
+//     });
+//   });
+// });
+
+let timeoutId = 0;
+const filterDataAsync = async (
+  data: Array<any>,
+  columns: Array<any>,
+  filters: { [key: string]: string }
+): Promise<Array<any>> => {
+  return new Promise((resolve) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      const filteredData = data.filter((row) => {
+        return columns.every((col) => {
+          if (col.filter && filters[col.key]) {
+            const filterValue = filters[col.key]?.toLowerCase() || "";
+            const cellValue = (row[col.key] || "").toString().toLowerCase();
+            return cellValue.includes(filterValue);
+          }
+          return true;
+        });
+      });
+      resolve(filteredData);
+    }, 700);
   });
-});
+};
+
+const fetchFilteredData = async () => {
+  filteredData.value = await filterDataAsync(
+    props.options.data,
+    props.options.columns,
+    filters
+  );
+};
+
+watch(
+  filters,
+  async () => {
+    // executed immediately, then again when `source` changes
+    await fetchFilteredData();
+  },
+  { immediate: true }
+);
+
 const paginatedData = computed(() => {
   const startIndex = (currentPage.value - 1) * itemsPerPage.value;
   const endIndex = startIndex + itemsPerPage.value;
-  return getData.value.slice(startIndex, endIndex);
+  return filteredData.value.slice(startIndex, endIndex);
 });
 
 const totalPages = computed(() => {
-  return Math.ceil(getData.value.length / itemsPerPage.value);
+  return Math.ceil(filteredData.value.length / itemsPerPage.value);
 });
 
 const goToPage = (page: number) => {
@@ -99,9 +155,7 @@ const goToPage = (page: number) => {
   }
 };
 
-const changeItemsPerPage = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  itemsPerPage.value = Number(target.value);
+const changeItemsPerPage = () => {
   currentPage.value = 1;
 };
 </script>
@@ -118,8 +172,13 @@ const changeItemsPerPage = (event: Event) => {
         <thead>
           <tr class="tr-column-names">
             <slot name="front-column-names" />
-            <th v-for="(item, index) in getColumnNames">
-              {{ item }}
+            <th v-for="(col, index) in getColumns">
+              {{ col.name }}
+              <i
+                class="bi bi-sort-alpha-down"
+                @click="sort('asc', col.key)"
+              ></i>
+              <i class="bi bi-sort-alpha-up" @click="sort('desc', col.key)"></i>
             </th>
             <!-- <th>#</th>
             <th>Name</th>
@@ -154,19 +213,27 @@ const changeItemsPerPage = (event: Event) => {
         </tbody>
       </table>
     </div>
+
     <div class="table-footer-card">
-      <select class="table-row-selector" @change="changeItemsPerPage">
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
+      <!-- @change="changeItemsPerPage" -->
+      <select
+        class="table-row-selector"
+        v-model="itemsPerPage"
+        @change="changeItemsPerPage"
+      >
+        <option>10</option>
+        <option>20</option>
+        <option>50</option>
+        <option>100</option>
       </select>
       <div class="pagination">
-        <button @click="goToPage(1)" :disabled="currentPage === 1">
+        <button @click="goToPage(1)" v-if="currentPage !== 1">
           <i class="bi bi-caret-left"></i><i class="bi bi-caret-left"></i>
         </button>
         <button
           @click="goToPage(currentPage - 1)"
           :disabled="currentPage === 1"
+          v-if="currentPage !== 1"
         >
           <i class="bi bi-caret-left"></i>
         </button>
@@ -181,12 +248,14 @@ const changeItemsPerPage = (event: Event) => {
         <button
           @click="goToPage(currentPage + 1)"
           :disabled="currentPage === totalPages"
+          v-if="currentPage !== totalPages"
         >
           <i class="bi bi-caret-right"></i>
         </button>
         <button
           @click="goToPage(totalPages)"
           :disabled="currentPage === totalPages"
+          v-if="currentPage !== totalPages"
         >
           <i class="bi bi-caret-right"></i>
           <i class="bi bi-caret-right"></i>
@@ -249,6 +318,10 @@ const changeItemsPerPage = (event: Event) => {
   cursor: pointer;
 }
 
+.pagination button:hover {
+  border: #1967d2 solid 1px;
+}
+
 .table-head-card button {
   padding: 4px;
   border: 1px solid var(--border-color);
@@ -258,7 +331,8 @@ const changeItemsPerPage = (event: Event) => {
 }
 
 .pagination .active {
-  background-color: #f9f9f9;
+  background-color: #1967d2;
+  color: #fff;
 }
 .table-card {
   margin: 20px;
