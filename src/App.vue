@@ -8,29 +8,34 @@ const options = {
       name: "Id",
       filter: true,
       sort: true,
+      width: '20px'
     },
     {
       key: "name",
       name: "Name",
-      filter: false,
+      filter: true,
       sort: true,
+      width:'100px'
     },
     {
       key: "lastName",
       name: "LastName",
       filter: true,
       sort: true,
+      width:'100px'
+
     },
   ],
   data: [
     { id: 1, name: "Alina", lastName: "Smith" },
-    { id: 2, name: "John", lastName: "Doe" },
+    { id: 2, name: "Jon", lastName: "Doe" },
+    { id: 2, name: "John", lastName: "Dozez" },
     { id: 3, name: "Emma", lastName: "Johnson" },
     { id: 4, name: "Michael", lastName: "Williams" },
     { id: 5, name: "Olivia", lastName: "Brown" },
     { id: 6, name: "James", lastName: "Jones" },
     { id: 7, name: "Sophia", lastName: "Garcia" },
-    { id: 8, name: "William", lastName: "Martinez" },
+    { id: 8, name: "William", lastName: "Dozez" },
     { id: 9, name: "Ava", lastName: "Davis" },
     { id: 10, name: "Benjamin", lastName: "Rodriguez" },
     { id: 11, name: "Mia", lastName: "Wilson" },
@@ -64,6 +69,15 @@ const options = {
     { id: 39, name: "Samuel", lastName: "Turner" },
     { id: 40, name: "Emily", lastName: "Phillips" },
   ],
+  colors: {
+
+      headRow: "#003366",
+      oddRow: "#e6f7ff",
+      evenRow: "#cceeff",
+      font: "#bbb",
+      border: "#99ccff",
+      card: "#f4faff",
+  },
 };
 </script>
 
