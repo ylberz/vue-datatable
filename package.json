@@ -1,14 +1,22 @@
 {
-  "name": "vue-datatable",
+  "name": "vue3-datatable",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+  "version": "0.0.1",
+  "author": "Ylber Zeqiri",
+  "main": "./dist/vue3-datatable.umd.js",
+  "module": "./dist/vue3-datatable.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue3-datatable.es.js",
+      "require": "./dist/vue3-datatable.umd.js"
+    },
+    "./dist/style.css": "./dist/style.css"
   },
   "dependencies": {
+    "bootstrap-icons": "^1.11.3",
+    "vue": "^3.4.35"
+  },
+  "peerDependencies": {
     "bootstrap-icons": "^1.11.3",
     "vue": "^3.4.35"
   },
