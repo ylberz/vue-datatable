@@ -3,11 +3,16 @@ import { computed, reactive, ref, watch } from "vue";
 
 const props = defineProps<{
   options: {
+    showCard:{
+      type:boolean,
+      default: false
+    },
     columns: Array<{
       key: string;
       name?: string | null;
       filter: boolean;
       sort: boolean;
+      width?:string;
     }>;
     data: Array<any>;
     colors?: {
@@ -82,7 +87,12 @@ const getColumnKeys = computed(() => {
 const getColumns = computed(() => {
   return props.options.columns;
 });
-
+const getColumnWidths = computed(() => {
+  return  props.options.columns.reduce((acc, col) => {
+    acc[col.key] = col.width || 'auto';
+    return acc;
+  }, {} as any);
+});
 
 let timeoutId = 0;
 const filterDataAsync = async (
@@ -148,7 +158,7 @@ const changeItemsPerPage = () => {
 </script>
 
 <template>
-  <div class="table-card">
+  <div :class="props.options.showCard? 'table-card':''" >
     <div class="table-head-card">
       <div class="table-options">
         <button @click="togleFilter"><i class="bi bi-funnel"></i></button>
@@ -156,10 +166,13 @@ const changeItemsPerPage = () => {
     </div>
     <div class="table-body-card">
       <table class="data-table">
+        <colgroup>
+          <col v-for="(col, index) in getColumns" :key="index" :style="{ width: getColumnWidths[col.key] }" />
+        </colgroup>
         <thead>
           <tr class="tr-column-names">
             <slot name="front-column-names" />
-            <th v-for="(col, index) in getColumns">
+            <th v-for="(col) in getColumns">
               {{ col.name }}
               <i
                 class="bi bi-sort-alpha-down"
@@ -256,8 +269,6 @@ const changeItemsPerPage = () => {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   color: var(--font-color);
-}
-.table-card {
   --font-color: v-bind(colors.font);
   --font-header-color:v-bind(colors.fontHeaderTable);
   --border-color: v-bind(colors.border);

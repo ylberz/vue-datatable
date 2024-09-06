@@ -2,33 +2,31 @@
 import datatable from "./components/datatable.vue";
 
 const options = {
+  showCard:true,
   columns: [
     {
       key: "id",
       name: "Id",
       filter: true,
       sort: true,
-      width: '20px'
+      width: '90px'
     },
     {
       key: "name",
       name: "Name",
       filter: true,
       sort: true,
-      width:'100px'
     },
     {
       key: "lastName",
       name: "LastName",
       filter: true,
       sort: true,
-      width:'100px'
 
     },
   ],
   data: [
     { id: 1, name: "Alina", lastName: "Smith" },
-    { id: 2, name: "Jon", lastName: "Doe" },
     { id: 2, name: "John", lastName: "Dozez" },
     { id: 3, name: "Emma", lastName: "Johnson" },
     { id: 4, name: "Michael", lastName: "Williams" },
