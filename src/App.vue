@@ -71,13 +71,14 @@ const options = {
   ],
   colors: {
 
-      headRow: "#003366",
-      oddRow: "#e6f7ff",
-      evenRow: "#cceeff",
-      font: "#bbb",
-      border: "#99ccff",
-      card: "#f4faff",
-  },
+      headRow: "#4a90e2",
+      oddRow: "#ffffff",
+      evenRow: "#f4f4f4",
+      font: "#333333",
+      fontHeaderTable: "#ffffff",
+      border: "#e0e0e0",
+      card: "#f5f5f5",
+    }
 };
 </script>
 

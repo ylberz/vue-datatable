@@ -6,9 +6,8 @@ const props = defineProps<{
     columns: Array<{
       key: string;
       name?: string | null;
-      filter?: boolean;
-      sort?: boolean;
-      width?: string;
+      filter: boolean;
+      sort: boolean;
     }>;
     data: Array<any>;
     colors?: {
@@ -16,6 +15,7 @@ const props = defineProps<{
       oddRow?: string;
       evenRow?: string;
       font?: string;
+      fontHeaderTable?:string;
       border?: string;
       card?: string;
     };
@@ -23,15 +23,16 @@ const props = defineProps<{
 }>();
 
 const defaultColors = {
-  headRow: "#f4f4f4",
-  oddRow: "#fff",
-  evenRow: "#f9f9f9",
-  font: "#333",
-  border: "#ddd",
-  card: "#fff",
+  headRow: "#4a90e2",
+  oddRow: "#ffffff",
+  evenRow: "#f4f4f4",
+  font: "#333333",
+  fontHeaderTable: "#ffffff",
+  border: "#e0e0e0",
+  card: "#f5f5f5",
 };
 
-const colors: any = reactive({
+const colors = reactive({
   ...defaultColors,
   ...props.options.colors,
 });
@@ -47,30 +48,19 @@ const showHide = reactive<{ filter: boolean }>({
 });
 
 const sort = (sortForm: string, key: string) => {
+  currentPage.value = 1;
   filteredData.value = filteredData.value.sort((a, b) => {
     if (a[key] < b[key]) {
-      return -1;
+      return sortForm=== 'asc' ? -1 : 1;
     }
     if (a[key] > b[key]) {
-      return 1;
+      return sortForm=== 'asc' ? 1 : -1;
     }
     return 0;
   });
 };
 
-const sort = (sortForm: string, key: string) => {
-  filteredData.value = filteredData.value.sort((a, b) => {
-    if (a[key] < b[key]) {
-      return -1;
-    }
-    if (a[key] > b[key]) {
-      return 1;
-    }
-    return 0;
-  });
-};
-
-const toggleFilter = () => {
+const togleFilter = () => {
   showHide.filter = !showHide.filter;
   if (showHide.filter) {
     props.options.columns.forEach((col) => {
@@ -85,10 +75,6 @@ const toggleFilter = () => {
   }
 };
 
-const getColumnNames = computed(() => {
-  return props.options.columns.map((col) => col.name || col.key);
-});
-
 const getColumnKeys = computed(() => {
   return props.options.columns.map((col) => col.key);
 });
@@ -97,26 +83,6 @@ const getColumns = computed(() => {
   return props.options.columns;
 });
 
-const getColumnWidths = computed(() => {
-  return props.options.columns.reduce((acc, col) => {
-    acc[col.key] = col.width || "auto";
-    return acc;
-  }, {} as any);
-});
-
-// const getData = computed(() => {
-//   currentPage.value = 1;
-//   return props.options.data.filter((row) => {
-//     return props.options.columns.every((col) => {
-//       if (col.filter && filters[col.key]) {
-//         const filterValue = filters[col.key]?.toLowerCase() || "";
-//         const cellValue = (row[col.key] || "").toString().toLowerCase();
-//         return cellValue.includes(filterValue);
-//       }
-//       return true;
-//     });
-//   });
-// });
 
 let timeoutId = 0;
 const filterDataAsync = async (
@@ -130,6 +96,7 @@ const filterDataAsync = async (
       const filteredData = data.filter((row) => {
         return columns.every((col) => {
           if (col.filter && filters[col.key]) {
+            currentPage.value=1;
             const filterValue = filters[col.key]?.toLowerCase() || "";
             const cellValue = (row[col.key] || "").toString().toLowerCase();
             return cellValue.includes(filterValue);
@@ -161,7 +128,7 @@ watch(
 
 const paginatedData = computed(() => {
   const startIndex = (currentPage.value - 1) * itemsPerPage.value;
-  const endIndex = startIndex + itemsPerPage.value;
+  const endIndex = startIndex + parseInt(itemsPerPage?.value.toString());
   return filteredData.value.slice(startIndex, endIndex);
 });
 
@@ -183,27 +150,12 @@ const changeItemsPerPage = () => {
 <template>
   <div class="table-card">
     <div class="table-head-card">
-      <div class="">
-        <select class="table-row-selector" @change="changeItemsPerPage">
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-        </select>
-      </div>
       <div class="table-options">
-        <button @click="toggleFilter"><i class="bi bi-funnel"></i></button>
+        <button @click="togleFilter"><i class="bi bi-funnel"></i></button>
       </div>
     </div>
     <div class="table-body-card">
       <table class="data-table">
-        <colgroup>
-          <col
-            v-for="(col, index) in getColumns"
-            :key="index"
-            :style="{ width: getColumnWidths[col.key] }"
-          />
-        </colgroup>
-
         <thead>
           <tr class="tr-column-names">
             <slot name="front-column-names" />
@@ -227,10 +179,9 @@ const changeItemsPerPage = () => {
               <input
                 class="inp-filter"
                 type="text"
-                v-if="col.filter"
+                v-if="col.filter === true"
                 v-model="filters[col.key]"
-                :placeholder="`Filter by ${col.name || col.key}`"
-                aria-label="Filter"
+                placeholder="Filter..."
               />
               <!-- how can i add dynamicly here vmodel for filter -->
             </th>
@@ -260,7 +211,6 @@ const changeItemsPerPage = () => {
         <option>10</option>
         <option>20</option>
         <option>50</option>
-        <option>100</option>
       </select>
       <div class="pagination">
         <button @click="goToPage(1)" v-if="currentPage !== 1">
@@ -309,12 +259,12 @@ const changeItemsPerPage = () => {
 }
 .table-card {
   --font-color: v-bind(colors.font);
+  --font-header-color:v-bind(colors.fontHeaderTable);
   --border-color: v-bind(colors.border);
   --headRow-color: v-bind(colors.headRow);
   --evenRow-color: v-bind(colors.evenRow);
   --oddRow-color: v-bind(colors.oddRow);
   --card-color: v-bind(colors.card);
-  max-width: 100%;
 }
 
 .table-options {
@@ -324,7 +274,6 @@ const changeItemsPerPage = () => {
 }
 .table-options button {
   margin: 4px;
-  cursor: pointer;
 }
 .tr-filters input {
   border: none;
@@ -335,6 +284,10 @@ const changeItemsPerPage = () => {
   outline: none;
   margin: 0;
   padding: 0;
+  color: var(--font-header-color);
+}
+.tr-filters input::placeholder {
+  color: var(--font-header-color);
 }
 .table-footer-card {
   margin-top: 10px;
@@ -360,14 +313,6 @@ const changeItemsPerPage = () => {
   border: #1967d2 solid 1px;
 }
 
-.pagination button:hover {
-  padding: 8px;
-  border: 1px solid #1967d2;
-}
-.table-head-card {
-  display: flex;
-  justify-content: space-between;
-}
 .table-head-card button {
   padding: 4px;
   border: 1px solid var(--border-color);
@@ -376,28 +321,8 @@ const changeItemsPerPage = () => {
   cursor: pointer;
 }
 
-input {
-  padding: 5px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  outline: 0;
-}
-
-button {
-  padding: 5px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.go-to-input {
-  width: 30px;
-  margin-right: 4px;
-}
 .pagination .active {
-  background-color: #1967d2;
-  color: #fff;
-  background-color: #1967d2;
+  background-color: var(--headRow-color);
   color: #fff;
 }
 .table-card {
@@ -426,6 +351,7 @@ button {
 .data-table thead tr th {
   background-color: var(--headRow-color);
   border-bottom: 2px solid var(--border-color);
+  color:var(--font-header-color);
 }
 
 .data-table tbody tr:nth-child(odd) {
@@ -442,9 +368,17 @@ button {
 .table-row-selector {
   padding: 8px;
   border: 1px solid var(--border-color);
+
   border-radius: 4px;
   font-size: 1em;
-  background-color: var(--primary-color);
+  background-color: var(--card-color);
+
+  cursor: pointer;
+}
+.table-card button {
+  cursor: pointer;
+}
+i{
   cursor: pointer;
 }
 </style>
