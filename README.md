@@ -21,13 +21,13 @@ npm install vue3-datatable
 import `vue3datatable` compnent in main.js:
 
 ```javascript
-
-import vue3datatable from "vue3-datatable";
-import "vue3-datatable/dist/style.css";
+import vue3datatable from "vue-table-data";
+import "vue-table-data/dist/style.css";
 
 const app = createApp(App);
 app.use(vue3datatable);
 app.mount("#app");
+
 ```
 
 use of the vue3Datatable
