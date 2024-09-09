@@ -25,7 +25,7 @@ const itemsPerPage = ref(10);
 const startPage= ref(1);
 const endPage =ref(1);
 
-const filteredData = ref<Array<any>>(structuredClone(props.options.data) || []); // Ref to store filtered data
+const filteredData = ref<Array<any>>(structuredClone(props.options.data) || []);
 
 const showHide = reactive<{ filter: boolean }>({
   filter: false,
@@ -109,7 +109,6 @@ const fetchFilteredData = async () => {
 watch(
   filters,
   async () => {
-    // executed immediately, then again when `source` changes
     await fetchFilteredData();
   },
   { immediate: true }
@@ -200,9 +199,7 @@ const changeItemsPerPage = () => {
               ></i>
               <i class="bi bi-sort-alpha-up" @click="sort('desc', col.key)"></i>
             </th>
-            <!-- <th>#</th>
-            <th>Name</th>
-            <th>LastName</th> -->
+
             <slot name="end-column-names" />
           </tr>
 
@@ -216,7 +213,6 @@ const changeItemsPerPage = () => {
                 v-model="filters[col.key]"
                 placeholder="Filter..."
               />
-              <!-- how can i add dynamicly here vmodel for filter -->
             </th>
             <slot name="end-column-filter" />
           </tr>
@@ -235,8 +231,6 @@ const changeItemsPerPage = () => {
     </div>
 
     <div class="table-footer-card">
-
-      <!-- @change="changeItemsPerPage" -->
       <select
         class="table-row-selector"
         v-model="itemsPerPage"
@@ -360,9 +354,9 @@ const changeItemsPerPage = () => {
 }
 .table-card {
   margin: 20px;
-  max-width: 100%; /* Ensures card does not exceed viewport width */
+  max-width: 100%;
   padding: 20px;
-  box-sizing: border-box; /* Includes padding in the width calculation */
+  box-sizing: border-box;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   background-color: var(--card-color);
