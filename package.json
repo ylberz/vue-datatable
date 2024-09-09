@@ -1,8 +1,11 @@
 {
-  "name": "vue3-datatable",
-  "private": true,
-  "version": "0.0.1",
+  "name": "vue-table-data",
+  "version": "1.0.1",
   "author": "Ylber Zeqiri",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ylberz/vue-datatable"
+  },
   "main": "./dist/vue3-datatable.umd.js",
   "module": "./dist/vue3-datatable.es.js",
   "scripts": {
@@ -17,18 +20,35 @@
     },
     "./dist/style.css": "./dist/style.css"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "bootstrap-icons": "^1.11.3",
     "vue": "^3.4.35"
   },
-  "peerDependencies": {
-    "bootstrap-icons": "^1.11.3",
-    "vue": "^3.4.35"
-  },
+
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.2",
     "typescript": "^5.5.3",
     "vite": "^5.4.2",
     "vue-tsc": "^2.0.29"
-  }
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "table",
+    "datatable",
+    "vue-table",
+    "vue-data",
+    "vue-datatable",
+    "vue3-datatable",
+    "vue-filter-table",
+    "vue-sort-table",
+    "vue-datatable-component",
+    "vue3-datatable-component",
+    "ajax",
+    "xhr",
+    "vuejs"
+  ]
 }
