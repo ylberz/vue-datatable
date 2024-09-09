@@ -1,31 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
-
-const props = defineProps<{
-  options: {
-    showCard:{
-      type:boolean,
-      default: false
-    },
-    columns: Array<{
-      key: string;
-      name?: string | null;
-      filter: boolean;
-      sort: boolean;
-      width?:string;
-    }>;
-    data: Array<any>;
-    colors?: {
-      headRow?: string;
-      oddRow?: string;
-      evenRow?: string;
-      font?: string;
-      fontHeaderTable?:string;
-      border?: string;
-      card?: string;
-    };
-  };
-}>();
+import OptionModel from "../models/OptionModel.ts";
+const props = defineProps<{options:OptionModel}>();
 
 const defaultColors = {
   headRow: "#4a90e2",
@@ -46,6 +22,9 @@ const filters = reactive<{ [key: string]: string }>({});
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+const startPage= ref(1);
+const endPage =ref(1);
+
 const filteredData = ref<Array<any>>(structuredClone(props.options.data) || []); // Ref to store filtered data
 
 const showHide = reactive<{ filter: boolean }>({
@@ -65,7 +44,7 @@ const sort = (sortForm: string, key: string) => {
   });
 };
 
-const togleFilter = () => {
+const toggleFilter = () => {
   showHide.filter = !showHide.filter;
   if (showHide.filter) {
     props.options.columns.forEach((col) => {
@@ -136,10 +115,48 @@ watch(
   { immediate: true }
 );
 
+const calcPageRange = () =>{
+  const totalPagesValue = totalPages.value;
+  const currentPageValue = currentPage.value;
+  if (totalPagesValue < 5) {
+    startPage.value = 1;
+    endPage.value = totalPagesValue;
+    return;
+  }
+  let start = currentPageValue - 2;
+  let end = currentPageValue + 2;
+  if (currentPageValue === totalPagesValue) {
+    start = Math.max(1, totalPagesValue - 4);
+    end = totalPagesValue;
+  } else if (currentPageValue <= 2) {
+    start = 1;
+    end = Math.min(5, totalPagesValue);
+  } else if (end > totalPagesValue) {
+    start = totalPagesValue - 4;
+    end = totalPagesValue;
+  }
+  startPage.value = Math.max(1, start);
+  endPage.value = end;
+}
+
+const getFields =  (count:any, startPage:any) => {
+  let fieldsArray = [];
+  let controlI = 0;
+  for (let i = startPage; i <= count && controlI < 5; i++, controlI++) {
+    fieldsArray.push({
+      pageNo: i,
+    });
+  }
+
+  return fieldsArray;
+}
 const paginatedData = computed(() => {
+  calcPageRange();
+
   const startIndex = (currentPage.value - 1) * itemsPerPage.value;
   const endIndex = startIndex + parseInt(itemsPerPage?.value.toString());
   return filteredData.value.slice(startIndex, endIndex);
+
 });
 
 const totalPages = computed(() => {
@@ -150,18 +167,21 @@ const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
   }
+
 };
 
 const changeItemsPerPage = () => {
   currentPage.value = 1;
 };
+
+
 </script>
 
 <template>
   <div :class="props.options.showCard? 'table-card':''" >
     <div class="table-head-card">
       <div class="table-options">
-        <button @click="togleFilter"><i class="bi bi-funnel"></i></button>
+        <button @click="toggleFilter"><i class="bi bi-funnel"></i></button>
       </div>
     </div>
     <div class="table-body-card">
@@ -215,6 +235,7 @@ const changeItemsPerPage = () => {
     </div>
 
     <div class="table-footer-card">
+
       <!-- @change="changeItemsPerPage" -->
       <select
         class="table-row-selector"
@@ -236,13 +257,14 @@ const changeItemsPerPage = () => {
         >
           <i class="bi bi-caret-left"></i>
         </button>
+
         <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="goToPage(page)"
-          :class="{ active: page === currentPage }"
+          v-for="(page,index) in getFields(endPage,startPage)"
+          :key="index"
+          @click="goToPage(page.pageNo)"
+          :class="{ active: page.pageNo === currentPage }"
         >
-          {{ page }}
+          {{ page.pageNo }}
         </button>
         <button
           @click="goToPage(currentPage + 1)"
