@@ -157,7 +157,7 @@ const defaultColors = {
 
 ## Preview
 
-![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-uploader/main/images/sc1.png)
+![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview.png)
 
 
 
