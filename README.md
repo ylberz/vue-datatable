@@ -153,6 +153,9 @@ const defaultColors = {
   card: "#f5f5f5",
 };
 ```
+
+![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview.png)
+
 Here are two samples demonstrating how to use the following colors. You can easily customize these colors by changing the props:
 ```javascript
 const colors = {
@@ -180,10 +183,7 @@ const colors = {
 ![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview-colors-sample-2.png)
 
 
-
-## Preview Datatable
-
-![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview.png)
+ 
 
 ### Preview datatable with filter
 ![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview-filter.png)
