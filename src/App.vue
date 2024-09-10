@@ -69,15 +69,28 @@ const options : OptionModel = {
     { id: 5, name: "Olivia", lastName: "Brown" },
     { id: 6, name: "James", lastName: "Jones" },
   ],
-  colors: {
-      headRow: "#4a90e2",
-      oddRow: "#ffffff",
-      evenRow: "#f4f4f4",
-      font: "#333333",
-      fontHeaderTable: "#ffffff",
-      border: "#e0e0e0",
-      card: "#f5f5f5",
-    }
+  colors:
+      {
+        "headRow": "#BC9F8B",      // Primary Terracotta
+        "oddRow": "#B5CFB7",       // Soft Sage
+        "evenRow": "#CADABF",      // Light Olive
+        "font": "#4a4a4a",         // A neutral gray for text (you can adjust this to match the palette if needed)
+        "fontHeaderTable": "#4a4a4a", // Neutral Gray (for consistency)
+        "border": "#b9b6b6",       // Pale Moss
+        "card": "#E7E8D8"          // Pale Moss
+      }
+      //
+      // {
+      //   "headRow": "#4A249D",      // Royal Purple
+      //   "oddRow": "#F6F5F5",       // Light Gold
+      //   "evenRow": "#F6F5F5",      // Soft Gray
+      //   "font": "#4A249D",         // Royal Purple (for consistency and readability)
+      //   "fontHeaderTable": "#fff", // Royal Purple (for consistency)
+      //   "border": "#009FBD",       // Bright Cyan
+      //   "card": "#F6F5F5"          // Soft Gray
+      // }
+
+
 };
 </script>
 
@@ -93,4 +106,5 @@ const options : OptionModel = {
       <td><button>Click</button></td>
     </template>
   </datatable>
+
 </template>

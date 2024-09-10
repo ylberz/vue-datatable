@@ -333,12 +333,17 @@ const changeItemsPerPage = () => {
   border: 1px solid var(--border-color);
   font-size: 1em;
   background-color: #fff;
-  color: #333;
+  color: var(--font-color);
   cursor: pointer;
 }
 
+.pagination button i {
+   color: var(--font-color);
+
+}
+
 .pagination button:hover {
-  border: #1967d2 solid 1px;
+  border: var(--headRow-color) solid 1px;
 }
 
 .table-head-card button {
@@ -389,9 +394,7 @@ const changeItemsPerPage = () => {
   background-color: var(--evenRow-color);
 }
 
-.data-table tbody tr:hover {
-  background-color: var(--evenRow-color);
-}
+
 
 .table-row-selector {
   padding: 8px;
@@ -406,7 +409,8 @@ const changeItemsPerPage = () => {
 .table-card button {
   cursor: pointer;
 }
-i{
+th i{
   cursor: pointer;
+   color: var(--font-header-color);
 }
 </style>

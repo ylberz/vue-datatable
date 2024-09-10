@@ -93,7 +93,7 @@ use of the vue3Datatable
 
 ## Props
 
-The `vue3datatable` component accepts the following props:
+The `vue-table-data` component accepts the following props:
 
 - **`options`** (Object): Configuration object for the data table.
     - **`showCard`** (Boolean): Show the table in a card layout. Default is `true`.
@@ -115,7 +115,7 @@ The `vue3datatable` component accepts the following props:
 
 ## Slots
 
-The `vue3datatable` component provides the following slots for additional customization:
+The `vue-table-data` component provides the following slots for additional customization:
 
 - **`front-column-names`**: Slot before the column headers.
 - **`end-column-names`**: Slot after the column headers.
@@ -127,7 +127,7 @@ The `vue3datatable` component provides the following slots for additional custom
 
 # Customization
 
-The `vue3datatable` component offers extensive customization options to match your design needs.
+The `vue-table-data` component offers extensive customization options to match your design needs.
 
 ### Color Customization
 
@@ -142,7 +142,6 @@ You can customize the colors of various parts of the table through the `colors` 
 - **`card`**: Background color for the card.
 
 By default, the component uses the following colors:
-
 ```javascript
 const defaultColors = {
   headRow: "#4a90e2",
@@ -154,12 +153,39 @@ const defaultColors = {
   card: "#f5f5f5",
 };
 ```
+Here are two samples demonstrating how to use the following colors. You can easily customize these colors by changing the props:
+```javascript
+const colors = {
+    "headRow": "#BC9F8B",      // Primary Terracotta
+    "oddRow": "#B5CFB7",       // Soft Sage
+    "evenRow": "#CADABF",      // Light Olive
+    "font": "#4a4a4a",         // A neutral gray for text (you can adjust this to match the palette if needed)
+    "fontHeaderTable": "#4a4a4a", // Neutral Gray (for consistency)
+    "border": "#b9b6b6",       // Pale Moss
+    "card": "#E7E8D8"          // Pale Moss
+}
+```
+![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview-colors-sample-1.png)
+```javascript
+const colors = {
+"headRow": "#4A249D",      // Royal Purple
+"oddRow": "#F6F5F5",       // Light Gold
+"evenRow": "#F6F5F5",      // Soft Gray
+"font": "#4A249D",         // Royal Purple (for consistency and readability)
+"fontHeaderTable": "#fff", // Royal Purple (for consistency)
+"border": "#009FBD",       // Bright Cyan
+"card": "#F6F5F5"          // Soft Gray
+}
+```
+![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview-colors-sample-2.png)
+
+
 
 ## Preview Datatable
 
 ![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview.png)
 
-### Preview Datatable with filter
+### Preview datatable with filter
 ![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview-filter.png)
 
 
