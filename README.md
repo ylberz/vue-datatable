@@ -1,6 +1,6 @@
 # Vue 3 Data Table Component
 
-`vue3datatable`is a highly customizable data table component designed for Vue 3. It provides robust features such as pagination, sorting, and filtering, making it a powerful tool for displaying and managing tabular data in Vue 3 applications. This component is designed for seamless integration into Vue 3 projects and offers extensive customization options to fit various design needs.
+`vue-table-data`is a highly customizable data table component designed for Vue 3. It provides robust features such as pagination, sorting, and filtering, making it a powerful tool for displaying and managing tabular data in Vue 3 applications. This component is designed for seamless integration into Vue 3 projects and offers extensive customization options to fit various design needs.
 
 ## Features
 
@@ -14,7 +14,7 @@
 To install this component via npm, use the following command:
 
 ```bash
-npm install vue3-datatable
+npm i vue-table-data
 ```
 ## usage / example
 
@@ -155,10 +155,12 @@ const defaultColors = {
 };
 ```
 
-## Preview
+## Preview Datatable
 
 ![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview.png)
 
+### Preview Datatable with filter
+![App Screenshot](https://raw.githubusercontent.com/ylberz/vue-datatable/main/public/preview-filter.png)
 
 
 ## Thanks a lot

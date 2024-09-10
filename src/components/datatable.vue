@@ -66,6 +66,7 @@ const getColumnKeys = computed(() => {
 const getColumns = computed(() => {
   return props.options.columns;
 });
+
 const getColumnWidths = computed(() => {
   return  props.options.columns.reduce((acc, col) => {
     acc[col.key] = col.width || 'auto';
@@ -192,7 +193,7 @@ const changeItemsPerPage = () => {
           <tr class="tr-column-names">
             <slot name="front-column-names" />
             <th v-for="(col) in getColumns">
-              {{ col.name }}
+              {{ col.name || col.key }}
               <i
                 class="bi bi-sort-alpha-down"
                 @click="sort('asc', col.key)"
